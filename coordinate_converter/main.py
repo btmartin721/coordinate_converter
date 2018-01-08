@@ -27,53 +27,33 @@ def read_csv(infile):
     whole_line = []
 
     with open(infile, "rb") as fin:
-
+        line1 = fin.readline().strip().split(",")
         for line in fin:
             line = line.strip("\r\n")
             whole_line.append(line.strip().split(","))
 
-    return whole_line
+    return whole_line, line1
 
-def convert_coords(lst):
+def get_index_from_regex(first_line):
 
-    dms_lat = []
-    dms_long = []
-    linenumber = 0
+    latitude = r"latitude"
+    longitude = r"longitude"
 
-    for line in lst:
-        if linenumber == 0:
-            first_line = line
+    idx_lst1 = get_header_idx(first_line, latitude)
+    idx_lst2 = get_header_idx(first_line, longitude)
 
-            latitude = r"latitude"
-            longitude = r"longitude"
+    if len(idx_lst1) != 1:
+        print("Error: There can only be one 'latitude' column")
+        sys.exit(1)
 
-            idx_lst1 = get_header_idx(first_line, latitude)
-            idx_lst2 = get_header_idx(first_line, longitude)
+    if len(idx_lst2) != 1:
+        print("Error: There can only be one 'longitude' column")
+        sys.exit(1)
 
-            if len(idx_lst1) != 1:
-                print("Error: There can only be one 'latitude' column")
-                sys.exit(1)
+    idx1 = idx_lst1[0]
+    idx2 = idx_lst2[0]
 
-            if len(idx_lst2) != 1:
-                print("Error: There can only be one 'longitude' column")
-                sys.exit(1)
-
-
-        elif linenumber > 0:
-
-            lat_idx = idx_lst1[0]
-            lat = line[lat_idx]
-
-            long_idx = idx_lst2[0]
-            longit = line[long_idx]
-
-            point = Point(lat, longit)
-            dms_lat.append(point.convert_dms_2_dd(point.getlat()))
-            dms_long.append(point.convert_dms_2_dd(point.getlong()))
-
-        linenumber += 1
-
-    return dms_lat, dms_long, first_line
+    return idx1, idx2
 
 
 # Make sure header line has columns named 'regex' and gets the associated index
@@ -88,6 +68,19 @@ def get_header_idx(first_line, regex):
 
     return idx
 
+def convert_coords(idx1, idx2, lst, dms_lst1, dms_lst2):
+
+    for line in lst:
+
+        lat = line[idx1]
+        longit = line[idx2]
+
+        point = Point(lat, longit)
+        dms_lat.append(point.convert_dms_2_dd(point.getlat()))
+        dms_long.append(point.convert_dms_2_dd(point.getlong()))
+
+    return dms_lst1, dms_lst2
+
 ################################################################################################################
 ##############################################    MAIN    ######################################################
 ################################################################################################################
@@ -95,9 +88,16 @@ def get_header_idx(first_line, regex):
 # Gets command-line arguments using argparse; argparse must be imported
 args = get_arguments()
 
-lines = read_csv(args.infile)
+lines, header = read_csv(args.infile)
 
-dms_lat, dms_long, header = convert_coords(lines)
+lat_idx, long_idx = get_index_from_regex(header)
+
+dms_lat = []
+dms_long = []
+
+dms_lat, dms_long = convert_coords(lat_idx, long_idx, lines, dms_lat, dms_long)
+
+print(dms_lat)
 
 #lat_direction = []
 #long_direction = []
