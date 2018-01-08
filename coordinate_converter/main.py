@@ -76,8 +76,8 @@ def convert_coords(idx1, idx2, lst, dms_lst1, dms_lst2):
         longit = line[idx2]
 
         point = Point(lat, longit)
-        dms_lat.append(point.convert_dms_2_dd(point.getlat()))
-        dms_long.append(point.convert_dms_2_dd(point.getlong()))
+        dms_lst1.append(point.convert_dms_2_dd(point.getlat()))
+        dms_lst2.append(point.convert_dms_2_dd(point.getlong()))
 
     return dms_lst1, dms_lst2
 
