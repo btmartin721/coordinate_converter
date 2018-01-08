@@ -96,11 +96,3 @@ dms_lat = []
 dms_long = []
 
 dms_lat, dms_long = convert_coords(lat_idx, long_idx, lines, dms_lat, dms_long)
-
-print(dms_lat)
-
-#lat_direction = []
-#long_direction = []
-
-#lat_direction = read_coordinates(lat_lst)
-#long_direction = read_coordinates(long_lst)
