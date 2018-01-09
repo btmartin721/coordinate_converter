@@ -3,6 +3,7 @@
 import argparse
 import re
 import sys
+import csv
 
 from point import Point
 
@@ -15,7 +16,6 @@ def get_arguments():
                         nargs="?", default="out.csv")
     parser.add_argument("-f", "--format", type=str, required=False, nargs="?", default="dd",
                         help="Specify the output coordinate format; default = dd (decimal degrees)")
-    parser.add_argument("-s", "--id", type=str, required=True, help="Sample ID column number (numbering starts on 1)")
     args = parser.parse_args()
 
     return args
@@ -30,7 +30,8 @@ def read_csv(infile):
         line1 = fin.readline().strip().split(",")
         for line in fin:
             line = line.strip("\r\n")
-            whole_line.append(line.strip().split(","))
+            if line.strip():
+                whole_line.append(line.strip().split(","))
 
     return whole_line, line1
 
@@ -68,18 +69,15 @@ def get_header_idx(first_line, regex):
 
     return idx
 
-def convert_coords(idx1, idx2, lst, dms_lst1, dms_lst2):
+def write_output(line_lst, outfile, first_line):
 
-    for line in lst:
+    with open(outfile, "w") as out:
+        csv_writer = csv.writer(out, delimiter=',', lineterminator="\n")
+        csv_writer.writerow(first_line)
+        for lne in line_lst:
+            csv_writer.writerow(lne)
 
-        lat = line[idx1]
-        longit = line[idx2]
 
-        point = Point(lat, longit)
-        dms_lst1.append(point.convert_dms_2_dd(point.getlat()))
-        dms_lst2.append(point.convert_dms_2_dd(point.getlong()))
-
-    return dms_lst1, dms_lst2
 
 ################################################################################################################
 ##############################################    MAIN    ######################################################
@@ -92,7 +90,34 @@ lines, header = read_csv(args.infile)
 
 lat_idx, long_idx = get_index_from_regex(header)
 
-dms_lat = []
-dms_long = []
+line_number = 1
 
-dms_lat, dms_long = convert_coords(lat_idx, long_idx, lines, dms_lat, dms_long)
+for line in lines:
+    lat = line[lat_idx]
+    longit = line[long_idx]
+
+    point = Point(lat, longit, line_number)
+
+    line_number += 1
+    dms_lat, ddm_lat, dd_lat = point.lat.parse_coordinates(lat, line_number)
+    dms_long, ddm_long, dd_long = point.lat.parse_coordinates(longit, line_number)
+
+    if dms_lat and dms_long:
+        dms_final_lat = point.convert_dms_2_dd(point.getlat())
+        dms_final_long = point.convert_dms_2_dd(point.getlong())
+        line[lat_idx] = dms_final_lat
+        line[long_idx] = dms_final_long
+
+    elif ddm_lat and ddm_long:
+        ddm_final_lat = point.convert_ddm_2_dd(point.getlat())
+        ddm_final_long = point.convert_ddm_2_dd(point.getlong())
+        line[lat_idx] = ddm_final_lat
+        line[long_idx] = ddm_final_long
+
+    elif dd_lat and dd_long:
+        dd_final_lat = point.get_dd(point.getlat())
+        dd_final_long = point.get_dd(point.getlong())
+        line[lat_idx] = dd_final_lat
+        line[long_idx] = dd_final_long
+
+write_output(lines, args.outfile, header)
