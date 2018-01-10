@@ -38,9 +38,9 @@ class Coords:
 
         dd_regex = re.compile(ur"^\s*([A-Za-z]?)\s*(-?)(\d+)\.{1}(\d+)\u00b0?\s*([A-Za-z]?)$", re.UNICODE)
 
-        dms_lst = []
-        ddm_lst = []
-        dd_lst = []
+        dms_temp = []
+        ddm_temp = []
+        dd_temp = []
 
         item = item.lstrip(' ')
         dms_match = dms_regex.search(item)
@@ -48,43 +48,43 @@ class Coords:
         dd_match = dd_regex.search(item)
 
         if dms_match:
-            dms_lst.append(dms_match.group(1))
-            dms_lst.append(dms_match.group(2))
-            dms_lst.append(dms_match.group(3))
-            dms_lst.append(dms_match.group(4))
-            dms_lst.append(dms_match.group(5))
-            dms_lst.append(dms_match.group(6))
-            dms_lst.append(dms_match.group(7))
+            dms_temp.append(dms_match.group(1))
+            dms_temp.append(dms_match.group(2))
+            dms_temp.append(dms_match.group(3))
+            dms_temp.append(dms_match.group(4))
+            dms_temp.append(dms_match.group(5))
+            dms_temp.append(dms_match.group(6))
+            dms_temp.append(dms_match.group(7))
 
             sign = self.check_direction(1, 7, dms_match)
-            dms_lst.append(sign)
+            dms_temp.append(sign)
 
         elif ddm_match:
-            ddm_lst.append(ddm_match.group(1))
-            ddm_lst.append(ddm_match.group(2))
-            ddm_lst.append(ddm_match.group(3))
-            ddm_lst.append(ddm_match.group(4))
-            ddm_lst.append(ddm_match.group(5))
-            ddm_lst.append(ddm_match.group(6))
+            ddm_temp.append(ddm_match.group(1))
+            ddm_temp.append(ddm_match.group(2))
+            ddm_temp.append(ddm_match.group(3))
+            ddm_temp.append(ddm_match.group(4))
+            ddm_temp.append(ddm_match.group(5))
+            ddm_temp.append(ddm_match.group(6))
 
             sign = self.check_direction(1, 6, ddm_match)
-            ddm_lst.append(sign)
+            ddm_temp.append(sign)
 
         elif dd_match:
-            dd_lst.append(dd_match.group(1))
-            dd_lst.append(dd_match.group(2))
-            dd_lst.append(dd_match.group(3))
-            dd_lst.append(dd_match.group(4))
+            dd_temp.append(dd_match.group(1))
+            dd_temp.append(dd_match.group(2))
+            dd_temp.append(dd_match.group(3))
+            dd_temp.append(dd_match.group(4))
 
             sign = self.check_direction(1, 5, dd_match)
-            dd_lst.append(sign)
+            dd_temp.append(sign)
 
         else:
             print("Error: Coordinate format not recognized on line " + str(line_number) + ": " + str(item) + "\n")
             print("Aborting program\n")
             sys.exit(1)
 
-        return dms_lst, ddm_lst, dd_lst
+        return dms_temp, ddm_temp, dd_temp
 
     def check_direction(self, group_number1, group_number2, match):
         if match.group(group_number1) is "N" or match.group(group_number1) is "E":
