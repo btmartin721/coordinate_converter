@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import argparse
-import re
 import sys
 import csv
 
 from point import Point
+import conversions as math
+
 
 # Gets command-line arguments using argparse
 def get_arguments():
@@ -23,7 +24,6 @@ def get_arguments():
 
 # Reads comma-delimited file and gets index of 'latitude' and 'longitude' columns
 def read_csv(infile):
-
     whole_line = []
 
     with open(infile, "rb") as fin:
@@ -35,48 +35,35 @@ def read_csv(infile):
 
     return whole_line, line1
 
-def get_index_from_regex(first_line):
 
+def get_index_from_regex(first_line):
     latitude = r"latitude"
     longitude = r"longitude"
 
-    idx_lst1 = get_header_idx(first_line, latitude)
-    idx_lst2 = get_header_idx(first_line, longitude)
-
-    if len(idx_lst1) != 1:
-        print("Error: There can only be one 'latitude' column")
-        sys.exit(1)
-
-    if len(idx_lst2) != 1:
-        print("Error: There can only be one 'longitude' column")
-        sys.exit(1)
-
-    idx1 = idx_lst1[0]
-    idx2 = idx_lst2[0]
+    idx1 = get_header_idx(first_line, latitude)
+    idx2 = get_header_idx(first_line, longitude)
 
     return idx1, idx2
 
 
-# Make sure header line has columns named 'regex' and gets the associated index
-def get_header_idx(first_line, regex):
-    if regex in first_line:
-        idx = [cnt for cnt, val in enumerate(first_line) \
-               if re.search(regex, val.lower().strip())]
-
-    else:
-        print("Error: The header line must contain a column named '" + regex + "'")
-        sys.exit(1)
-
-    return idx
-
 def write_output(line_lst, outfile, first_line):
-
     with open(outfile, "w") as out:
         csv_writer = csv.writer(out, delimiter=',', lineterminator="\n")
         csv_writer.writerow(first_line)
         for lne in line_lst:
             csv_writer.writerow(lne)
 
+
+# Make sure header line has columns named 'regex' and gets the associated index
+def get_header_idx(first_line, regex):
+    if regex in first_line:
+        idx = first_line.index(regex.lower().strip())
+
+    else:
+        print("Error: The header line must contain a column named '" + regex + "'")
+        sys.exit(1)
+
+    return idx
 
 
 ################################################################################################################
@@ -100,24 +87,45 @@ for line in lines:
 
     line_number += 1
     dms_lat, ddm_lat, dd_lat = point.lat.parse_coordinates(lat, line_number)
-    dms_long, ddm_long, dd_long = point.lat.parse_coordinates(longit, line_number)
+    dms_long, ddm_long, dd_long = point.long.parse_coordinates(longit, line_number)
 
-    if dms_lat and dms_long:
-        dms_final_lat = point.convert_dms_2_dd(point.getlat())
-        dms_final_long = point.convert_dms_2_dd(point.getlong())
-        line[lat_idx] = dms_final_lat
-        line[long_idx] = dms_final_long
+    format = args.format.lower().strip()
 
-    elif ddm_lat and ddm_long:
-        ddm_final_lat = point.convert_ddm_2_dd(point.getlat())
-        ddm_final_long = point.convert_ddm_2_dd(point.getlong())
-        line[lat_idx] = ddm_final_lat
-        line[long_idx] = ddm_final_long
+    if format == "dd":
 
-    elif dd_lat and dd_long:
-        dd_final_lat = point.get_dd(point.getlat())
-        dd_final_long = point.get_dd(point.getlong())
-        line[lat_idx] = dd_final_lat
-        line[long_idx] = dd_final_long
+        if dms_lat and dms_long:
+            dms2dd_lat = math.convert_dms_2_dd(point.getlat())
+            dms2dd_long = math.convert_dms_2_dd(point.getlong())
+            line[lat_idx] = dms2dd_lat
+            line[long_idx] = dms2dd_long
+
+        elif ddm_lat and ddm_long:
+            ddm2dd_lat = math.convert_ddm_2_dd(point.getlat())
+            ddm2dd_long = math.convert_ddm_2_dd(point.getlong())
+            line[lat_idx] = ddm2dd_lat
+            line[long_idx] = ddm2dd_long
+
+        elif dd_lat and dd_long:
+            dd2dd_lat = math.get_dd_from_dd(point.getlat())
+            dd2dd_long = math.get_dd_from_dd(point.getlong())
+            line[lat_idx] = dd2dd_lat
+            line[long_idx] = dd2dd_long
+
+    elif format == "dms":
+
+        if dd_lat and dd_long:
+            dd2dms_lat = math.convert_dd_2_dms(point.getlat())
+            dd2dms_long = math.convert_dd_2_dms(point.getlong())
+            line[lat_idx] = dd2dms_lat
+            line[long_idx] = dd2dms_long
+
+    elif format =="ddm":
+
+            dd2ddm_lat = math.convert_dd_2_ddm(point.getlat())
+            dd2ddm_long = math.convert_dd_2_ddm(point.getlong())
+            line[lat_idx] = dd2ddm_lat
+            line[long_idx] = dd2ddm_long
 
 write_output(lines, args.outfile, header)
+
+print(lines)
