@@ -6,25 +6,28 @@ class Coords:
     pos = r"positive"
     neg = r"negative"
 
-    def __init__(self, string, linenum):
+    def __init__(self, string, linenum, pos, neg):
         dms_lst, ddm_lst, dd_lst = self.parse_coordinates(string, linenum)
-        if dms_lst:
+        if dms_lst:     # If input format is dms
             self.dms_degrees = dms_lst[2]
             self.dms_minutes = dms_lst[3]
             self.dms_seconds = dms_lst[4]
             self.dms_decimal = dms_lst[5]
             self.dms_sign = dms_lst[7]
 
-        elif ddm_lst:
+        elif ddm_lst:     # If input format is ddm
             self.ddm_degrees = ddm_lst[2]
             self.ddm_minutes = ddm_lst[3]
             self.ddm_decimal = ddm_lst[4]
             self.ddm_sign = ddm_lst[6]
 
-        elif dd_lst:
+        elif dd_lst:     # If input format is dd
             self.dd_degrees = dd_lst[2]
             self.dd_decimal = dd_lst[3]
             self.dd_sign = dd_lst[4]
+
+        self.pos = pos
+        self.neg = neg
 
     def parse_coordinates(self, item, line_number):
         """
@@ -84,9 +87,9 @@ class Coords:
             print("Aborting program\n")
             sys.exit(1)
 
-        return dms_temp, ddm_temp, dd_temp
+        return dms_temp, ddm_temp, dd_temp     # returns three lists containing coordinate parts
 
-    def check_direction(self, group_number1, group_number2, match):
+    def check_direction(self, group_number1, group_number2, match):     # Checks cardinal sign
         if match.group(group_number1) is "N" or match.group(group_number1) is "E":
             sign = Coords.pos
         elif match.group(group_number1) is "S" or match.group(group_number1) is "W":
