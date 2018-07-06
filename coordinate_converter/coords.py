@@ -36,7 +36,7 @@ class Coords:
         dms_regex = re.compile(
             ur"^\s*([A-Za-z]?)\s*(-?)(\d{1,3})\u00b0?\s+(\d{1,2})'?\s+(\d+)\"?\.?(\d*)\"?\s*([A-Za-z]?)$", re.UNICODE)
 
-        ddm_regex = re.compile(ur"^\s*([A-Za-z]?)\s*(-?)(\d{1,3})\u00b0?\s+(\d{1,2})'?\.{1}(\d+)\"?\s*([A-Za-z]?)$",
+        ddm_regex = re.compile(ur"^\s*([A-Za-z]?)\s*(-?)(\d{1,3})\u00b0?(?:\s+|\.+)(\d{1,2})'?\.{1}(\d+)\"?\s*([A-Za-z]?)$",
                                re.UNICODE)
 
         dd_regex = re.compile(ur"^\s*([A-Za-z]?)\s*(-?)(\d+)\.{1}(\d+)\u00b0?\s*([A-Za-z]?)$", re.UNICODE)
