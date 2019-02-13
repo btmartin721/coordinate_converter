@@ -13,7 +13,7 @@ Required argument:
     
 Optional arguments:
 
-    -f, --format [ dms | ddm | dd ]: output coordinate format; default = 'dd' (decimal degrees)
+    -f, --format [ dms || ddm || dd ]: output coordinate format; default = 'dd' (decimal degrees)
     -o, --outfile [ filename ]: Specify output filename; default = out.csv
     -h, --help: Displays help menu
     
